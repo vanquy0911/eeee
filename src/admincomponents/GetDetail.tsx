@@ -1,27 +1,20 @@
 import React, { useEffect, useState } from "react";
 import { fetchProductDetails } from "../api/productApi";
 import { fetchCategory } from "../api/CategoryApi";
+import { getProductReviews } from "../api/productApi";
 import { IProduct } from "../types/product";
 import { ICategory } from "../types/category";
 import { useParams, useNavigate } from "react-router-dom";
-import { AddToCartButton } from "../components/AddToCartButton";
-import { submitReview, getProductReviews } from "../api/productApi";
 import { useAuth } from "../context/AuthContext";
 
 const GetDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const [product, setProduct] = useState<IProduct | null>(null);
   const [categories, setCategories] = useState<ICategory[]>([]);
+  const [reviews, setReviews] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const [rating, setRating] = useState<number>(0);
-  const [comment, setComment] = useState<string>("");
-  const [reviews, setReviews] = useState<any[]>([]);
-  const [showReviews, setShowReviews] = useState<boolean>(false);
-  const [hasReviewed, setHasReviewed] = useState<boolean>(false);
   const navigate = useNavigate();
-
-  const { token, user } = useAuth();
 
   useEffect(() => {
     const getCategories = async () => {
@@ -33,6 +26,15 @@ const GetDetail: React.FC = () => {
       }
     };
 
+    // hàm chỉnh sửa sản phẩm
+    const handleEditProduct = () => {
+      if (product && product._id) {
+        navigate(`/admin/edit-product/${product._id}`);
+      }
+    };
+    
+
+    // lấy chi tiết sản phẩm
     const getProductDetail = async () => {
       try {
         if (!id) {
@@ -47,63 +49,20 @@ const GetDetail: React.FC = () => {
         setLoading(false);
       }
     };
+    // lấy đánh giá sản phẩm
+    const getReviews = async () => {
+      try {
+        const data = await getProductReviews(id!);
+        setReviews(data);
+      } catch (err) {
+        console.error("Lỗi khi lấy đánh giá:", err);
+      }
+    };
 
     getCategories();
     getProductDetail();
+    getReviews();
   }, [id]);
-
-  const handleGetReviews = async () => {
-    try {
-      const reviewsData = await getProductReviews(id!);
-      setReviews(reviewsData);
-      setShowReviews(true);
-      const userHasReviewed = reviewsData.some(
-        (review) => review.user === user?.name
-      );
-      setHasReviewed(userHasReviewed);
-    } catch (err) {
-      console.error("Lỗi khi lấy danh sách đánh giá:", err);
-      alert("Đã có lỗi xảy ra khi lấy danh sách đánh giá.");
-    }
-  };
-
-  const handleReviewSubmit = async () => {
-    if (rating < 1 || rating > 5) {
-      alert("Vui lòng chọn số sao hợp lệ (từ 1 đến 5).");
-      return;
-    }
-    if (!comment.trim()) {
-      alert("Vui lòng nhập nội dung đánh giá.");
-      return;
-    }
-
-    if (hasReviewed) {
-      alert("Bạn đã đánh giá sản phẩm này rồi.");
-      return;
-    }
-
-    try {
-      if (!token) {
-        alert("Bạn cần phải đăng nhập để gửi đánh giá.");
-        return;
-      }
-      const response = await submitReview(id!, token, rating, comment);
-      if (response) {
-        alert("Đánh giá của bạn đã được gửi thành công!");
-        await handleGetReviews();
-      }
-    } catch (err) {
-      console.error("Lỗi khi gửi đánh giá:", err);
-      if (err.response && err.response.status === 400) {
-        alert("Bạn đã đánh giá sản phẩm này rồi.");
-      } else {
-        alert("Đã có lỗi xảy ra khi gửi đánh giá.");
-      }
-    }
-
-    setRating(0);
-    setComment("");
-  };
 
   if (loading)
     return (
@@ -123,11 +82,9 @@ const GetDetail: React.FC = () => {
     (category) => category._id === product?.category
   )?.name;
 
-  const handleBuyNow = () => {
+  const handleEditProduct = () => {
     if (product) {
-      navigate("/create", {
-        state: { product },
-      });
+      navigate(`/admin/edit-product/${product._id}`);
     }
   };
 
@@ -174,13 +131,9 @@ const GetDetail: React.FC = () => {
               </div>
             </div>
 
-            <p
-              className={
-                product?.countInStock ? "text-green-600" : "text-red-600"
-              }
-            >
-              <span className="font-semibold">Tình trạng:</span>{" "}
-              {product?.countInStock ? "Còn hàng" : "Hết hàng"}
+            <p className="text-gray-700">
+              <span className="font-semibold">Số lượng trong kho:</span>{" "}
+              {product?.countInStock ?? 0}
             </p>
 
             <p className="text-gray-700">
@@ -189,14 +142,12 @@ const GetDetail: React.FC = () => {
             </p>
           </div>
 
-          <div className="flex flex-wrap gap-4 mb-8">
-            <AddToCartButton product={product!} />
-
+          <div className="mb-8">
             <button
-              onClick={handleBuyNow}
-              className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition duration-300 font-medium"
+              onClick={handleEditProduct}
+              className="px-6 py-3 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition duration-300 font-medium"
             >
-              Mua ngay
+              Chỉnh sửa sản phẩm
             </button>
           </div>
         </div>
@@ -204,103 +155,40 @@ const GetDetail: React.FC = () => {
 
       {/* Reviews Section */}
       <div className="mt-12 border-t pt-8">
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold text-gray-800">
-            Đánh giá sản phẩm
-          </h2>
-          <button
-            onClick={handleGetReviews}
-            className="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition duration-300"
-          >
-            {showReviews ? "Ẩn đánh giá" : "Xem đánh giá"}
-          </button>
-        </div>
-
-        {showReviews && (
-          <div className="space-y-6 mb-8">
-            {reviews.length === 0 ? (
-              <p className="text-gray-600">Chưa có đánh giá nào.</p>
-            ) : (
-              reviews.map((review, index) => (
-                <div key={index} className="bg-gray-50 p-4 rounded-lg">
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <p className="font-semibold text-gray-800">
-                        {review.name}
-                      </p>
-                      <div className="flex items-center mt-1">
-                        <span className="text-yellow-400">
-                          {"★".repeat(review.rating)}
-                        </span>
-                        <span className="text-gray-400">
-                          {"★".repeat(5 - review.rating)}
-                        </span>
-                      </div>
-                    </div>
-                    <p className="text-sm text-gray-500">
-                      {new Date(review.createdAt).toLocaleDateString("vi-VN", {
-                        year: "numeric",
-                        month: "long",
-                        day: "numeric",
-                      })}
+        <h2 className="text-2xl font-bold mb-4">Đánh giá sản phẩm</h2>
+        {reviews.length === 0 ? (
+          <p className="text-gray-600">Chưa có đánh giá nào.</p>
+        ) : (
+          <div className="space-y-6">
+            {reviews.map((review, index) => (
+              <div key={index} className="bg-gray-50 p-4 rounded-lg shadow">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <p className="font-semibold text-gray-800">
+                      {review.name}
                     </p>
+                    <div className="flex items-center mt-1">
+                      <span className="text-yellow-400">
+                        {"★".repeat(review.rating)}
+                      </span>
+                      <span className="text-gray-300">
+                        {"★".repeat(5 - review.rating)}
+                      </span>
+                    </div>
                   </div>
-                  <p className="mt-2 text-gray-700">{review.comment}</p>
+                  <p className="text-sm text-gray-500">
+                    {new Date(review.createdAt).toLocaleDateString("vi-VN", {
+                      year: "numeric",
+                      month: "long",
+                      day: "numeric",
+                    })}
+                  </p>
                 </div>
-              ))
-            )}
+                <p className="mt-2 text-gray-700">{review.comment}</p>
+              </div>
+            ))}
           </div>
         )}
-
-        {/* Review Form */}
-        <div className="bg-white p-6 rounded-lg shadow-md">
-          <h3 className="text-xl font-semibold mb-4">Viết đánh giá của bạn</h3>
-
-          <div className="mb-4">
-            <label className="block text-gray-700 font-medium mb-2">
-              Số sao (1-5)
-            </label>
-            <input
-              type="number"
-              value={rating}
-              onChange={(e) => setRating(Number(e.target.value))}
-              min="1"
-              max="5"
-              className="w-20 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-
-          <div className="mb-4">
-            <label className="block text-gray-700 font-medium mb-2">
-              Nội dung đánh giá
-            </label>
-            <textarea
-              value={comment}
-              onChange={(e) => setComment(e.target.value)}
-              placeholder="Nhập đánh giá của bạn về sản phẩm..."
-              rows={4}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-
-          <button
-            onClick={handleReviewSubmit}
-            disabled={hasReviewed}
-            className={`px-6 py-2 rounded-md text-white font-medium ${
-              hasReviewed
-                ? "bg-gray-400 cursor-not-allowed"
-                : "bg-blue-600 hover:bg-blue-700"
-            } transition duration-300`}
-          >
-            {hasReviewed ? "Bạn đã đánh giá" : "Gửi đánh giá"}
-          </button>
-
-          {hasReviewed && (
-            <p className="mt-2 text-sm text-gray-600">
-              Bạn đã đánh giá sản phẩm này trước đó.
-            </p>
-          )}
-        </div>
       </div>
     </div>
   );

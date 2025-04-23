@@ -9,7 +9,7 @@ const HomePage = () => {
     <div className="min-h-screen flex flex-col">
       <main className="flex-grow">
         <Banner />
-        <FeaturedProducts />
+        <FeaturedProducts /> 
       </main>
       <Footer />
     </div>

@@ -78,7 +78,7 @@ const Header = () => {
 
   // Danh sách các mục điều hướng với icon tương ứng
   const navItems = [
-    { path: "/admin", name: "Trang chủ", icon: <Home size={18} /> },
+    // { path: "/admin", name: "Trang chủ", icon: <Home size={18} /> },
     {
       path: "/admin/products",
       name: "Quản lý sản phẩm",
@@ -116,7 +116,7 @@ const Header = () => {
               <li key={item.path}>
                 <Link
                   to={item.path}
-                  className="flex items-center text-lg text-white hover:text-gray-200 font-medium transition px-3 py-2 rounded hover:bg-gray-700"
+                  className="flex items-center text-sm text-white hover:text-gray-200 font-medium transition px-3 py-2 rounded hover:bg-gray-700"
                 >
                   <span className="mr-2">{item.icon}</span>
                   {item.name}
@@ -133,7 +133,7 @@ const Header = () => {
               {/* Avatar & Tên */}
               <button
                 onClick={handleToggleProfile}
-                className="text-lg text-white hover:text-gray-200 font-medium transition flex items-center"
+                className="text-sm text-white hover:text-gray-200 font-medium transition flex items-center"
               >
                 <div className="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center text-white mr-2">
                   {user.name?.charAt(0).toUpperCase()}
@@ -145,7 +145,7 @@ const Header = () => {
               {user.isAdmin && (
                 <Link
                   to="/admin"
-                  className="flex items-center text-lg text-yellow-400 hover:text-yellow-600 font-medium transition"
+                  className="flex items-center text-sm text-yellow-400 hover:text-yellow-600 font-medium transition"
                 >
                   <ShieldCheck className="h-5 w-5 mr-2" />
                   Admin
@@ -153,13 +153,13 @@ const Header = () => {
               )}
 
               {/* Đăng xuất */}
-              <button
+              {/* <button
                 onClick={handleLogout}
                 className="flex items-center text-lg text-red-400 hover:text-red-600 transition"
                 title="Đăng xuất"
               >
                 <LogOut className="h-5 w-5" />
-              </button>
+              </button> */}
 
               {/* Thông tin cá nhân */}
               {showProfile && (

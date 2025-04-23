@@ -14,6 +14,8 @@ import { getCart } from "../api/CartApi";
 import axios from "axios";
 import { jwtDecode } from "jwt-decode";
 import { updateUserProfile } from "../api/UserApi";
+
+
 const Header = () => {
   const { user, logout, token } = useAuth();
   const navigate = useNavigate();
@@ -196,18 +198,20 @@ const Header = () => {
   };
 
   return (
+        // Logo
     <header className="bg-gradient-to-r from-gray-800 to-gray-900 shadow-sm sticky top-0 z-50">
       <div className="container mx-auto px-4 py-4 flex justify-between items-center">
         <div className="text-3xl font-bold text-white">
           <Link to="/">NodeX-Store</Link>
         </div>
 
+        {/* Trang chủ và sản phẩm*/}
         <nav className="hidden md:flex space-x-8 relative">
           <ul className="flex space-x-8">
             <li>
               <Link
                 to="/"
-                className="text-lg text-white hover:text-gray-200 font-medium transition"
+                className="text-lg text-white hover:text-gray-500 font-medium transition"
               >
                 Trang chủ
               </Link>
@@ -215,7 +219,7 @@ const Header = () => {
             <li>
               <button
                 onClick={handleViewProducts}
-                className="text-lg text-white hover:text-gray-200 font-medium transition"
+                className="text-lg text-white hover:text-gray-500 font-medium transition"
               >
                 Sản phẩm
               </button>
@@ -223,15 +227,46 @@ const Header = () => {
           </ul>
         </nav>
 
-        <div className="hidden md:flex items-center space-x-4 text-white text-lg">
+        <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                const keyword = (e.currentTarget.elements.namedItem("keyword") as HTMLInputElement).value;
+                navigate(`/products?keyword=${encodeURIComponent(keyword)}`);
+              }}
+              className="flex items-center space-x-2"
+            >
+              <input
+                type="text"
+                name="keyword"
+                placeholder="Tìm kiếm..."
+                className="w-64 px-3 py-1.5 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
+              />
+              <button
+                type="submit"
+                className="bg-indigo-600 text-white px-4 py-1 rounded-md hover:bg-indigo-700 transition text-sm"
+              >
+                Tìm
+              </button>
+          </form>
+
+        {/* <div className="hidden md:flex items-center space-x-1 text-white text-lg">
           <Phone className="h-6 w-6 mr-2" />
-          <span>Liên hệ hỗ trợ 1900 2154</span>
+          <span>Hotline hỗ trợ <br/>1900 2154</span>
+        </div> */}
+        <div className="fixed right-4 bottom-20 z-50 flex items-center space-x-2 bg-white shadow-md px-4 py-2 rounded-full border border-gray-300 hover:shadow-lg transition">
+          <Phone className="text-indigo-600 w-5 h-5" />
+          <div className="flex flex-col leading-tight text-sm text-gray-700">
+            <span className="font-semibold">Hotline hỗ trợ:</span>
+            <a href="tel:19002154" className="font-bold text-black hover:underline">
+              1900 2154
+            </a>
+          </div>
         </div>
 
         <div className="flex items-center space-x-6">
           <Link
             to="/orders"
-            className="flex items-center text-lg text-white hover:text-gray-200 font-medium transition"
+            className="flex items-center text-lg text-white hover:text-gray-500 font-medium transition"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -251,7 +286,7 @@ const Header = () => {
           </Link>
           <Link
             to="/cart"
-            className="flex items-center text-lg text-white hover:text-gray-200 font-medium transition relative"
+            className="flex items-center text-lg text-white hover:text-gray-500 font-medium transition relative"
           >
             <ShoppingCart className="h-7 w-7 mr-2" />
             Giỏ hàng
@@ -266,7 +301,7 @@ const Header = () => {
             <div className="flex items-center space-x-4 relative">
               <button
                 onClick={handleToggleProfile}
-                className="text-lg text-white hover:text-gray-200 font-medium transition flex items-center"
+                className="text-lg text-white hover:text-gray-500 font-medium transition flex items-center"
               >
                 <div className="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center text-white mr-2">
                   {user.name?.charAt(0).toUpperCase()}
@@ -283,14 +318,14 @@ const Header = () => {
                   Admin
                 </Link>
               )}
-
+{/* 
               <button
                 onClick={handleLogout}
                 className="flex items-center text-lg text-red-400 hover:text-red-600 transition"
                 title="Đăng xuất"
               >
                 <LogOut className="h-5 w-5" />
-              </button>
+              </button> */}
 
               {showProfile && (
                 <div className="absolute right-0 top-12 bg-white rounded-lg shadow-xl overflow-hidden w-72 z-50 border border-gray-200">
@@ -413,13 +448,21 @@ const Header = () => {
                             Đổi mật khẩu
                           </button>
                         </div>
-                        <div className="flex justify-end pt-2">
+                        <div className="flex justify-between items-center pt-2">
                           <button
                             onClick={() => setIsEditing(true)}
                             className="flex items-center px-3 py-1 text-sm bg-indigo-50 text-indigo-600 rounded-md hover:bg-indigo-100 transition"
                           >
                             <Edit className="h-4 w-4 mr-1" />
                             Cập nhật
+                          </button>
+
+                          <button
+                            onClick={handleLogout}
+                            className="flex items-center px-3 py-1 text-sm bg-red-100 text-red-600 rounded-md hover:bg-red-200 transition"
+                          >
+                            <LogOut className="h-4 w-4 mr-1" />
+                            Đăng xuất
                           </button>
                         </div>
                       </div>

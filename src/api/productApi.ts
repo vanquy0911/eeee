@@ -1,5 +1,17 @@
 import api from "../config/axios"; // Import axios đã config
 import { IProduct } from "../types/product"; // Import kiểu dữ liệu sản phẩm
+
+//định nghĩa kiểu dữ liệu cho edit sản phẩm (admin)
+export interface ProductUpdatePayload {
+  name: string;
+  description: string;
+  price: number;
+  countInStock: number;
+  category: string;
+  image: string;
+}
+
+
 export const fetchProducts = async () => {
   try {
     const response = await api.get("/products"); // Không cần baseURL nữa
@@ -101,20 +113,19 @@ export const addProduct = async (productData: FormData, token: string) => {
 
 export const updateProduct = async (
   productId: string,
-  productData: IProduct,
+  productData: ProductUpdatePayload,
   token: string
 ) => {
   try {
-    // Gửi yêu cầu PUT để sửa sản phẩm theo ID
     const response = await api.put(`/products/${productId}`, productData, {
       headers: {
-        Authorization: `Bearer ${token}`, // Gửi token trong header Authorization
+        Authorization: `Bearer ${token}`,
       },
     });
-
-    return response.data; // Trả về phản hồi từ API, có thể là thông báo thành công hoặc dữ liệu sản phẩm đã sửa
+    return response.data;
   } catch (error) {
     console.error("Lỗi khi sửa sản phẩm:", error);
-    throw error; // Ném lỗi nếu có
+    throw error;
   }
 };
+

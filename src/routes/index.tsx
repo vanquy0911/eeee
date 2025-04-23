@@ -21,6 +21,9 @@ import AddProduct from "../admincomponents/AddProduct";
 import UpdateProduct from "../admincomponents/GetDetail";
 import GetDetail from "../admincomponents/GetDetail";
 import ChangePassword from "../pages/ChangePassword";
+import EditProduct from "../admincomponents/EditProduct";
+import CategoryManager from "../admincomponents/CategoryManager";
+
 const AppRoutes = () => {
   return (
     <AuthProvider>
@@ -63,7 +66,9 @@ const AppRoutes = () => {
                   <Route path="/" element={<AdminPage />} />
                   <Route path="/products" element={<AdminProductList />} />
                   <Route path="/add-product" element={<AddProduct />} />
-                  <Route path="/admin/product/:id" element={<GetDetail />} />
+                  <Route path="/product/:id" element={<GetDetail />} /> 
+                  <Route path="/edit-product/:id" element={<EditProduct />} />
+                  <Route path="/categories" element={ <CategoryManager/>} />
                 </Routes>
                 <Chatbot />
               </AdminLayout>
