@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { getOrders, cancelOrder, createPaymentLink } from "../api/OrderApi";
 import { Link, useNavigate } from "react-router-dom";
+import { format } from "date-fns";
+
 
 interface OrderItem {
   productId: string;
@@ -173,8 +175,7 @@ const ListOrder: React.FC = () => {
                   Đơn hàng #{order._id.slice(-6).toUpperCase()}
                 </h2>
                 <p className="text-sm text-gray-500 mt-1">
-                  Ngày đặt:{" "}
-                  {new Date(order.createdAt).toLocaleDateString("vi-VN")}
+                  Ngày đặt: {format(new Date(order.createdAt), "dd/MM/yyyy - HH:mm")}
                 </p>
               </div>
               <div>{getStatusBadge(order.isPaid, order.isDelivered)}</div>

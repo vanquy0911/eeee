@@ -37,6 +37,8 @@ export const createPaymentLink = async (token: string, orderId: string) => {
     );
   }
 };
+
+// lấy đơn hàng của người dùng hiện tại
 export const getOrders = async (token: string) => {
   try {
     const response = await api.get("/orders/me", {
@@ -51,6 +53,35 @@ export const getOrders = async (token: string) => {
     );
   }
 };
+
+// lấy danh sách đơn hàng của admin
+export const getAllOrders = async (token: string) => {
+  try {
+    const response = await api.get("/orders", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data; // Giả sử trả về { orders: [...] }
+  } catch (error: any) {
+    throw new Error(
+      error.response?.data?.message || "Lỗi khi lấy danh sách tất cả đơn hàng!"
+    );
+  }
+};
+// lấy thông tin chi tiết đơn hàng
+export const confirmOrder = async (token: string, orderId: string) => {
+  try {
+    const res = await api.put(`/orders/${orderId}/confirm`, {}, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return res.data;
+  } catch (error: any) {
+    throw new Error(error.response?.data?.message || "Lỗi khi xác nhận đơn hàng!");
+  }
+};
+
+
 export const cancelOrder = async (token: string, orderId: string) => {
   try {
     const response = await api.delete(`/orders/${orderId}`, {

@@ -5,31 +5,38 @@ import React, {
   useEffect,
   ReactNode,
 } from "react";
-import { User } from "../types/User"; // Import interface User
+import { User } from "../types/User"; // Interface của user (bạn đã có)
 
 export interface AuthContextType {
   user: User | null;
   token: string | null;
   login: (userData: User, token: string) => void;
   logout: () => void;
-  getToken: () => string | null; // Thêm hàm getToken
+  getToken: () => string | null;
 }
 
 export const AuthContext = createContext<AuthContextType | null>(null);
 
-export const AuthProvider: React.FC<{ children: ReactNode }> = ({
-  children,
-}) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [token, setToken] = useState<string | null>(null);
-
-  useEffect(() => {
+export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+  const [user, setUser] = useState<User | null>(() => {
     const storedUser = localStorage.getItem("user");
-    const storedToken = localStorage.getItem("token");
+    return storedUser ? JSON.parse(storedUser) : null;
+  });
 
-    if (storedUser && storedToken) {
-      setUser(JSON.parse(storedUser));
-      setToken(storedToken);
+  const [token, setToken] = useState<string | null>(() => {
+    return localStorage.getItem("token");
+  });
+
+  // Khi component mount, kiểm tra lại localStorage (phòng trường hợp useState chưa đủ)
+  useEffect(() => {
+    if (!user) {
+      const storedUser = localStorage.getItem("user");
+      if (storedUser) setUser(JSON.parse(storedUser));
+    }
+
+    if (!token) {
+      const storedToken = localStorage.getItem("token");
+      if (storedToken) setToken(storedToken);
     }
   }, []);
 
@@ -47,7 +54,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
     localStorage.removeItem("token");
   };
 
-  // Hàm getToken để lấy token
   const getToken = () => {
     return token || localStorage.getItem("token");
   };
